@@ -60,6 +60,14 @@ namespace WebApiShop.Controllers
             return NoContent();
         }
 
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAvailable()
+        {
+            var products = await _IProductsServices.GetAvailableProducts();
+            if (!products.Any()) return NoContent();
+            return Ok(products);
+        }
+
     }
 }
 

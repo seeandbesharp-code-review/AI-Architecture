@@ -66,5 +66,13 @@ namespace Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<Product>> GetAvailableProducts()
+        {
+            return await _context.Products
+                .Where(p => p.IsAvailable)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
     }
 }

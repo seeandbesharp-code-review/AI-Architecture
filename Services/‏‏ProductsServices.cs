@@ -88,5 +88,11 @@ namespace Services
             if (deleted) await InvalidateCache();
             return deleted;
         }
+
+        public async Task<IEnumerable<ProductDTO>> GetAvailableProducts()
+        {
+            var products = await _repository.GetAvailableProducts();
+            return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(products);
+        }
     }
 }

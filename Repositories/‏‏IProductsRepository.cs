@@ -11,5 +11,6 @@ namespace Repositories
         public Task<Product> AddProduct(Product product);
         public Task<Product?> UpdateProduct(int id, Product product);
         public Task<bool> DeleteProduct(int id);
+        public Task<IEnumerable<Product>> GetAvailableProducts();
     }
 }

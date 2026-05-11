@@ -11,5 +11,6 @@ namespace Services
         public Task<ProductDTO> AddProduct(ProductDTO product);
         public Task<ProductDTO?> UpdateProduct(int id, ProductDTO product);
         public Task<bool> DeleteProduct(int id);
+        public Task<IEnumerable<ProductDTO>> GetAvailableProducts();
     }
 }
