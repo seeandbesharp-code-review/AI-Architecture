@@ -45,7 +45,7 @@ WebApiShop.sln
 5. **Add AutoMapper mappings** in `WebApiShop/AutoMapper.cs` using `CreateMap<Entity, DTO>().ReverseMap()`.
 6. **All database access is async** — use `async Task<T>` / `await`; never `.Result` or `.Wait()`.
 7. **Logging uses Serilog** — inject `ILogger<T>` from `Microsoft.Extensions.Logging`.
-
+8. **API Architecture Persona:** When generating, reviewing, or refactoring Controllers and API logic, you must strictly follow the architectural persona defined in `.github/agents/api-architect.agent.md`.
 ---
 
 ## Adding a New Resource (order matters)
@@ -84,7 +84,5 @@ dotnet ef database update --project Repositories
 dotnet run --project WebApiShop
 dotnet test
 ```
-
-> **Known pre-existing build issues:** `WebApiShop.csproj` is missing `Serilog` and `Microsoft.AspNetCore.Authentication.JwtBearer` package references, so solution-level `dotnet build` fails. Build individual projects to validate your changes: `dotnet build Repositories/Repositories.csproj` or `dotnet build Services/Services.csproj`.
 
 > Integration tests require a live SQL Server at `srv2\pupils` — run unit tests only with `dotnet test --filter "FullyQualifiedName!~Integration"`.
