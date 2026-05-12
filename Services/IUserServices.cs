@@ -11,5 +11,7 @@ namespace Services
         Task<IEnumerable<UserDTO>> GetUsers();
         Task<bool> UserWithSameEmail(string email, int id = -1);
         public bool IsPasswordStrong(string password);
+
+        string GenerateToken(UserDTO user);
     }
 }

@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services;
 using DTOs;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebApiShop.Controllers
 {
@@ -15,11 +14,8 @@ namespace WebApiShop.Controllers
         {
             _ICategoriesServices = categoriesServices;
         }
-        
-
 
         [HttpGet]
-
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {
             IEnumerable<CategoryDTO> categories = await _ICategoriesServices.GetCategories();
@@ -27,8 +23,6 @@ namespace WebApiShop.Controllers
                 return Ok(categories);
             return NoContent();
         }
-
     }
 }
-
 

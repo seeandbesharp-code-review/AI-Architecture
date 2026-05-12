@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services;
 using AutoMapper;
 using DTOs;
-
 
 namespace WebApiShop.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly IOrdersServices _ordersServices;
@@ -15,7 +16,7 @@ namespace WebApiShop.Controllers
         {
             _ordersServices = ordersServices;
         }
-       
+
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDTO>> Get(int id)
         {
@@ -26,20 +27,12 @@ namespace WebApiShop.Controllers
         }
 
         [HttpPost]
-       public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
+        public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
         {
             OrderDTO? placedOrder = await _ordersServices.AddOrder(newOrder);
             if (placedOrder == null)
                 return BadRequest("Invalid order. Please check order items and products.");
             return CreatedAtAction(nameof(Get), new { id = placedOrder.OrderId }, placedOrder);
         }
-
-
-
-
-
-
     }
 }
-
-

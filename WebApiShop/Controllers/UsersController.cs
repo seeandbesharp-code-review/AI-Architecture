@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services;
 using DTOs;
+using WebApiShop.Attributes;
 
 namespace WebApiShop.Controllers
 {
@@ -15,6 +17,8 @@ namespace WebApiShop.Controllers
             _userServices = userServices;
             _logger = logger;
         }
+
+        [AdminOnly]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> Get()
         {
@@ -24,7 +28,7 @@ namespace WebApiShop.Controllers
             return NoContent();
         }
 
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUserById(int id)
         {
@@ -33,13 +37,22 @@ namespace WebApiShop.Controllers
                 return NotFound();
             return Ok(user);
         }
+
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login([FromBody] ExistingUserDTO existingUser)
         {
-
             UserDTO? user = await _userServices.Login(existingUser);
-            if (user== null)
+            if (user == null)
                 return Unauthorized("Invalid email or password");
+
+            string token = _userServices.GenerateToken(user);
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(3)
+            });
 
             _logger.LogInformation($"login attempted id:{user.UserId} email:{user.Email} first name:{user.FirstName} last name:{user.LastName}");
             return Ok(user);
@@ -55,11 +68,20 @@ namespace WebApiShop.Controllers
             UserDTO? returnedUser = await _userServices.Register(newUser);
             if (returnedUser == null)
                 return BadRequest();
+
+            string token = _userServices.GenerateToken(returnedUser);
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(3)
+            });
+
             return CreatedAtAction(nameof(Get), new { id = returnedUser.UserId }, returnedUser);
-
-
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PostUserDTO updateUser)
         {
@@ -70,5 +92,3 @@ namespace WebApiShop.Controllers
         }
     }
 }
-
-
