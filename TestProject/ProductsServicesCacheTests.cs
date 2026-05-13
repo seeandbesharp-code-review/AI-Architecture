@@ -46,7 +46,7 @@ namespace TestProject
         }
 
         private ProductsServices CreateService() =>
-            new ProductsServices(_repositoryMock.Object, _mapper, _redisMock.Object, _configuration);
+            new ProductsServices(_repositoryMock.Object, _mapper, _configuration, _redisMock.Object);
 
         [Fact]
         public async Task GetProducts_WhenCacheIsEmpty_ShouldFetchFromRepositoryAndStoreInCache()

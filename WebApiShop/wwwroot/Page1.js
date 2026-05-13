@@ -60,7 +60,9 @@ async function Login() {
         }
 
         if (!response.ok) {
-            throw new Error("An unexpected error occurred.");
+            const errData = await response.json().catch(() => null);
+            const msg = errData?.message || errData?.innerException || "An unexpected error occurred.";
+            throw new Error(msg);
         }
 
         const dataLogin = await response.json();

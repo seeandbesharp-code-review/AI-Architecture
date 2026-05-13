@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using DTOs;
-using WebApiShop.Attributes;
 
 namespace WebApiShop.Controllers
 {
@@ -18,7 +17,7 @@ namespace WebApiShop.Controllers
             _logger = logger;
         }
 
-        [AdminOnly]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> Get()
         {
@@ -28,7 +27,7 @@ namespace WebApiShop.Controllers
             return NoContent();
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUserById(int id)
         {
@@ -38,6 +37,7 @@ namespace WebApiShop.Controllers
             return Ok(user);
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login([FromBody] ExistingUserDTO existingUser)
         {
@@ -49,7 +49,7 @@ namespace WebApiShop.Controllers
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(3)
             });
@@ -58,6 +58,7 @@ namespace WebApiShop.Controllers
             return Ok(user);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<UserDTO>> Register([FromBody] PostUserDTO newUser)
         {
@@ -73,7 +74,7 @@ namespace WebApiShop.Controllers
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(3)
             });

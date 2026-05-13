@@ -8,7 +8,6 @@ namespace WebApiShop.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly IOrdersServices _ordersServices;
@@ -17,6 +16,7 @@ namespace WebApiShop.Controllers
             _ordersServices = ordersServices;
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDTO>> Get(int id)
         {
@@ -26,8 +26,9 @@ namespace WebApiShop.Controllers
             return NotFound();
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
+       public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
         {
             OrderDTO? placedOrder = await _ordersServices.AddOrder(newOrder);
             if (placedOrder == null)

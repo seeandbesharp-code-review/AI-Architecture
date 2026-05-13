@@ -11,16 +11,16 @@ namespace Services
     {
         private readonly IProductsRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IDatabase _redisDb;
+        private readonly IDatabase? _redisDb;
         private readonly int _ttlMinutes;
         private const string CacheKey = "products:all";
 
         public ProductsServices(IProductsRepository repository, IMapper mapper,
-            IConnectionMultiplexer redis, IConfiguration configuration)
+            IConfiguration configuration, IConnectionMultiplexer? redis = null)
         {
             _repository = repository;
             _mapper = mapper;
-            _redisDb = redis.GetDatabase();
+            _redisDb = redis?.GetDatabase();
             _ttlMinutes = configuration.GetValue<int>("Redis:TtlMinutes");
         }
         public async Task<PageResponseDTO<ProductDTO>> GetProducts(int position, int skip, int?[] categoryIds,
@@ -44,12 +44,18 @@ namespace Services
         }
         public async Task<IEnumerable<ProductDTO>> GetProducts()
         {
-            var cached = await _redisDb.StringGetAsync(CacheKey);
-            if (cached.HasValue)
-                return JsonSerializer.Deserialize<IEnumerable<ProductDTO>>(cached!)!;
+            if (_redisDb != null)
+            {
+                var cached = await _redisDb.StringGetAsync(CacheKey);
+                if (cached.HasValue)
+                    return JsonSerializer.Deserialize<IEnumerable<ProductDTO>>(cached!)!;
+            }
 
             var products = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _repository.GetProducts());
-            await _redisDb.StringSetAsync(CacheKey, JsonSerializer.Serialize(products), TimeSpan.FromMinutes(_ttlMinutes));
+
+            if (_redisDb != null)
+                await _redisDb.StringSetAsync(CacheKey, JsonSerializer.Serialize(products), TimeSpan.FromMinutes(_ttlMinutes));
+
             return products;
         }
 
@@ -62,7 +68,8 @@ namespace Services
 
         private async Task InvalidateCache()
         {
-            await _redisDb.KeyDeleteAsync(CacheKey);
+            if (_redisDb != null)
+                await _redisDb.KeyDeleteAsync(CacheKey);
         }
 
         public async Task<ProductDTO> AddProduct(ProductDTO product)

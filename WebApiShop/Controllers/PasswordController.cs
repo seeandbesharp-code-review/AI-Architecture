@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services;
 
 namespace WebApiShop.Controllers
@@ -13,6 +14,7 @@ namespace WebApiShop.Controllers
             _passwordServices = passwordServices;
         }
 
+        [AllowAnonymous]
         [HttpPost("PasswordScore")]
         public ActionResult<int> PasswordScore([FromBody] string password)
         {

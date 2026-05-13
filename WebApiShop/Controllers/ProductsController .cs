@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using DTOs;
-using WebApiShop.Attributes;
 
 namespace WebApiShop.Controllers
 {
@@ -16,6 +15,7 @@ namespace WebApiShop.Controllers
             _IProductsServices = productsServices;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<PageResponseDTO<ProductDTO>>> Get(int position, int skip, [FromQuery] int?[] categoryIds, string? description, int? maxPrice, int? minPrice)
         {
@@ -25,6 +25,7 @@ namespace WebApiShop.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
@@ -33,6 +34,7 @@ namespace WebApiShop.Controllers
             return Ok(product);
         }
 
+        [AllowAnonymous]
         [HttpGet("available")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAvailable()
         {
@@ -41,7 +43,7 @@ namespace WebApiShop.Controllers
             return Ok(products);
         }
 
-        [AdminOnly]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> Post([FromBody] ProductDTO product)
         {
@@ -49,7 +51,7 @@ namespace WebApiShop.Controllers
             return CreatedAtAction(nameof(Get), new { }, created);
         }
 
-        [AdminOnly]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ProductDTO>> Put(int id, [FromBody] ProductDTO product)
         {
@@ -58,7 +60,7 @@ namespace WebApiShop.Controllers
             return Ok(updated);
         }
 
-        [AdminOnly]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

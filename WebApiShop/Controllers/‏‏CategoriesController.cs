@@ -15,6 +15,7 @@ namespace WebApiShop.Controllers
             _ICategoriesServices = categoriesServices;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {

@@ -25,8 +25,9 @@
                 var errorResponse = new
                 {
                     message = ex.Message,
-                    stackTrace = ex.StackTrace,
-                    innerException = ex.InnerException?.Message
+                    innerException = ex.InnerException?.Message,
+                    innerInner = ex.InnerException?.InnerException?.Message,
+                    stackTrace = ex.StackTrace
                 };
 
                 await context.Response.WriteAsJsonAsync(errorResponse);
