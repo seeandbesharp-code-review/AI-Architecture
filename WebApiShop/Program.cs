@@ -115,4 +115,6 @@ app.UseAuthorization();
 app.UseMiddleware<RatingMiddleware>();
 app.MapControllers();
 
+await WebApiShop.DataMigration.PasswordHashMigration.RunAsync(app.Services);
+
 app.Run();

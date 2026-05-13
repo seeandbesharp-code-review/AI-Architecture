@@ -21,10 +21,14 @@ namespace Repositories
         {
             return await _context.Users.FindAsync(id);
         }
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _context.Users.Include(u => u.Orders).FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<User?> Login(string email, string password)
         {
-            return await _context.Users.Include(user=>user.Orders).FirstOrDefaultAsync(user => user.Email == email && user.Password == password);
-
+            return await _context.Users.Include(user => user.Orders).FirstOrDefaultAsync(user => user.Email == email && user.Password == password);
         }
         public async Task<User?> Register(User user)
         {

@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace Services
+﻿namespace Services
 {
     public interface IPasswordServices
     {
-        public int PasswordScore(string password);
+        int PasswordScore(string password);
+        string HashPassword(string password);
+        bool VerifyPassword(string password, string hash);
     }
 }
