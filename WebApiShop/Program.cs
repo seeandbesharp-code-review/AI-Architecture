@@ -58,6 +58,7 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 builder.Services.AddScoped<IPasswordServices, PasswordServices>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 
 try

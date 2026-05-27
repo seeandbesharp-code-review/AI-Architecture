@@ -2,7 +2,9 @@
 using AutoMapper;
 using Repositories;
 using Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 namespace Services
 {
     public class OrdersServices : IOrdersServices
@@ -11,12 +13,17 @@ namespace Services
         private readonly IProductsRepository _products;
         private readonly IMapper _mapper;
         private readonly ILogger<OrdersServices> _logger;
-        public OrdersServices(IOrdersRepository orders, IProductsRepository products, IMapper mapper, ILogger<OrdersServices> logger)
+        private readonly IKafkaProducerService _kafkaProducer;
+        private readonly string _ordersTopic;
+
+        public OrdersServices(IOrdersRepository orders, IProductsRepository products, IMapper mapper, ILogger<OrdersServices> logger, IKafkaProducerService kafkaProducer, IConfiguration configuration)
         {
             _orders = orders;
             _products = products;
             _mapper = mapper;
             _logger = logger;
+            _kafkaProducer = kafkaProducer;
+            _ordersTopic = configuration["Kafka:Topics:Orders"] ?? "shop-orders";
         }
 
         public async Task<OrderDTO?> GetOrderById(int id)
@@ -52,7 +59,21 @@ namespace Services
             Order placedOrder = await _orders.AddOrder(_mapper.Map<OrderDTO, Order>(orderWithCalculatedSum)); //
             _logger.LogInformation($"Order Id {placedOrder.OrderId} placed successfully with sum: {calculatedSum}");
 
-            return _mapper.Map<Order, OrderDTO>(placedOrder);
+            var orderResult = _mapper.Map<Order, OrderDTO>(placedOrder);
+
+            var eventPayload = JsonSerializer.Serialize(new
+            {
+                orderId = placedOrder.OrderId,
+                userId = placedOrder.UserId,
+                orderDate = placedOrder.OrderDate,
+                orderSum = placedOrder.OrderSum,
+                items = orderResult.OrderItems
+            });
+
+            await _kafkaProducer.ProduceAsync(_ordersTopic, placedOrder.OrderId.ToString(), eventPayload);
+            _logger.LogInformation($"Order event published to Kafka topic '{_ordersTopic}' for OrderId: {placedOrder.OrderId}");
+
+            return orderResult;
         }
 
         public async Task<double> ValidateOrderSum(OrderDTO order)

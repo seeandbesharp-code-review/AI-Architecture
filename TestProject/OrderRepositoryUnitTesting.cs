@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.EntityFrameworkCore;
 using Repositories;
@@ -75,6 +76,8 @@ namespace TestProject
         private readonly Mock<IProductsRepository> _mockProductsRepository;
         private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<ILogger<OrdersServices>> _mockLogger;
+        private readonly Mock<IKafkaProducerService> _mockKafkaProducer;
+        private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly OrdersServices _ordersServices;
 
         public OrderSumValidationTests()
@@ -83,11 +86,16 @@ namespace TestProject
             _mockProductsRepository = new Mock<IProductsRepository>();
             _mockMapper = new Mock<IMapper>();
             _mockLogger = new Mock<ILogger<OrdersServices>>();
+            _mockKafkaProducer = new Mock<IKafkaProducerService>();
+            _mockConfiguration = new Mock<IConfiguration>();
+            _mockConfiguration.Setup(c => c[It.IsAny<string>()]).Returns("shop-orders");
             _ordersServices = new OrdersServices(
                 _mockOrdersRepository.Object,
                 _mockProductsRepository.Object,
                 _mockMapper.Object,
-                _mockLogger.Object);
+                _mockLogger.Object,
+                _mockKafkaProducer.Object,
+                _mockConfiguration.Object);
         }
 
         [Fact]
