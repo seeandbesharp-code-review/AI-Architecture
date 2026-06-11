@@ -1,9 +1,20 @@
 ﻿
+async function fetchWithRetry(url, options = {}, retries = 3, delayMs = 500) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        const response = await fetch(url, options);
+        if (response.ok || response.status < 500)
+            return response;
+        if (attempt < retries)
+            await new Promise(r => setTimeout(r, delayMs * attempt));
+    }
+    throw new Error("Request failed after " + retries + " attempts");
+}
+
 async function checkPasswordScore() {
     try {
         const password = document.querySelector("#password2").value
         const progress = document.querySelector("#passwordScore")
-        const response = await fetch('api/Password/PasswordScore', {
+        const response = await fetchWithRetry('api/Password/PasswordScore', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -26,7 +37,7 @@ async function checkPasswordScore() {
 
 async function getUserData() {
     try {
-        const response = await fetch('api/Users');
+        const response = await fetchWithRetry('api/Users');
         if (!response.ok)
             throw new Error("error")
 
@@ -47,7 +58,7 @@ async function Login() {
         if (email == "" || password == "")
             throw Error("Please enter userName and password")
         const LoginUser = { email, password }
-        const response = await fetch('api/Users/Login', {
+        const response = await fetchWithRetry('api/Users/Login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -84,7 +95,7 @@ async function Register() {
         const data = { Email, FirstName, LastName, Password };
         if (Email == "" || Password == "")
             throw Error("Please enter user name and password")
-        const response = await fetch("api/Users", {
+        const response = await fetchWithRetry("api/Users", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

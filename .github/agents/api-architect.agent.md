@@ -7,14 +7,15 @@ name: 'API Architect'
 
 ## Project Context
 
-WebApiShop is a **.NET 9 / C# ASP.NET Core Web API** for an online shop. It uses a strict 4-layer architecture:
+WebApiShop is a **.NET 9 / C# ASP.NET Core Web API** for an online shop. It uses a strict 3-layer architecture:
 
 | Layer | Project | Responsibility |
 |---|---|---|
 | **Controllers** | `WebApiShop/Controllers/` | HTTP surface — thin, delegates to service |
 | **Services** | `Services/` | Business logic, AutoMapper, Redis caching |
 | **Repositories** | `Repositories/` | EF Core queries against SQL Server |
-| **Entities / DTOs** | `Entities/` / `DTOs/` | Domain models (EF) and API shapes (C# records) |
+
+> `Entities/` (domain models) and `DTOs/` (API shapes) are shared class libraries, not architectural layers.
 
 **Tech stack:** EF Core (SQL Server), AutoMapper, Serilog, JWT Bearer auth, Redis (StackExchange.Redis), xUnit + Moq, rate-limiting middleware, request-tracking middleware (`RatingMiddleware`).
 
