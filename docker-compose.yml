@@ -47,5 +47,15 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092
 
+  mongodb:
+    image: mongo:latest
+    container_name: webapishop-mongo
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo_data:/data/db 
+    restart: always
+
 volumes:
   redis_data:
+  mongo_data:
