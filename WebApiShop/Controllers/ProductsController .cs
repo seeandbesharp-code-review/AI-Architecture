@@ -35,6 +35,15 @@ namespace WebApiShop.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAll()
+        {
+            var products = await _IProductsServices.GetProducts();
+            if (!products.Any()) return NoContent();
+            return Ok(products);
+        }
+
+        [AllowAnonymous]
         [HttpGet("available")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAvailable()
         {

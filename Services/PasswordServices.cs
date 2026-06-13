@@ -4,10 +4,17 @@ namespace Services
 {
     public class PasswordServices : IPasswordServices
     {
+        private const int MinimumPasswordScore = 2;
+
         public int PasswordScore(string password)
         {
             var result = Zxcvbn.Core.EvaluatePassword(password);
             return result.Score;
+        }
+
+        public bool IsPasswordStrong(string password)
+        {
+            return PasswordScore(password) >= MinimumPasswordScore;
         }
 
         public string HashPassword(string password)
