@@ -61,13 +61,20 @@ builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 
-try
+var redisCon = builder.Configuration.GetValue<string>("Redis:ConnectionString");
+if (!string.IsNullOrEmpty(redisCon))
 {
-    var redisCon = builder.Configuration.GetValue<string>("Redis:ConnectionString");
-    if (!string.IsNullOrEmpty(redisCon))
+    try
+    {
         builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisCon));
+    }
+    catch (Exception ex)
+    {
+        // Log and fail fast — a missing Redis connection should not silently disable caching
+        Console.Error.WriteLine($"[STARTUP] Redis connection failed: {ex.Message}. Check Redis:ConnectionString configuration.");
+        throw;
+    }
 }
-catch { }
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey missing");
