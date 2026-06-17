@@ -11,7 +11,7 @@ namespace Services
     {
         private readonly IProductsRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IDatabase? _redisDb;
+        private readonly IDatabase _redisDb;
         private readonly int _ttlMinutes;
         private const string CacheKey = "products:all";
 
@@ -44,6 +44,7 @@ namespace Services
         }
         public async Task<IEnumerable<ProductDTO>> GetProducts()
         {
+
             if (_redisDb != null)
             {
                 var cached = await _redisDb.StringGetAsync(CacheKey);

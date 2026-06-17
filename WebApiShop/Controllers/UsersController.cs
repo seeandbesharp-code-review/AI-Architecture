@@ -10,10 +10,15 @@ namespace WebApiShop.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserServices _userServices;
+        private readonly IPasswordServices _passwordServices;
+        private readonly IJwtService _jwtService;
         private readonly ILogger<UsersController> _logger;
-        public UsersController(IUserServices userServices, ILogger<UsersController> logger)
+
+        public UsersController(IUserServices userServices, IPasswordServices passwordServices, IJwtService jwtService, ILogger<UsersController> logger)
         {
             _userServices = userServices;
+            _passwordServices = passwordServices;
+            _jwtService = jwtService;
             _logger = logger;
         }
 
@@ -45,7 +50,7 @@ namespace WebApiShop.Controllers
             if (user == null)
                 return Unauthorized("Invalid email or password");
 
-            string token = _userServices.GenerateToken(user);
+            string token = _jwtService.GenerateToken(user);
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
@@ -64,13 +69,13 @@ namespace WebApiShop.Controllers
         {
             if (!await _userServices.UserWithSameEmail(newUser.Email))
                 return BadRequest("The email already exists. Please try again.");
-            if (!_userServices.IsPasswordStrong(newUser.Password))
+            if (!_passwordServices.IsPasswordStrong(newUser.Password))
                 return BadRequest("The password is too weak. Please try again.");
             UserDTO? returnedUser = await _userServices.Register(newUser);
             if (returnedUser == null)
                 return BadRequest();
 
-            string token = _userServices.GenerateToken(returnedUser);
+            string token = _jwtService.GenerateToken(returnedUser);
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
@@ -86,7 +91,7 @@ namespace WebApiShop.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PostUserDTO updateUser)
         {
-            if (!_userServices.IsPasswordStrong(updateUser.Password))
+            if (!_passwordServices.IsPasswordStrong(updateUser.Password))
                 return BadRequest("The password is too weak. Please try again.");
             await _userServices.Update(id, updateUser);
             return NoContent();

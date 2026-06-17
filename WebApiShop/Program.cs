@@ -58,22 +58,25 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 builder.Services.AddScoped<IPasswordServices, PasswordServices>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
 
 var redisCon = builder.Configuration.GetValue<string>("Redis:ConnectionString");
 if (!string.IsNullOrEmpty(redisCon))
 {
-    try
+    var redisPassword = builder.Configuration["REDIS_PASSWORD"];
+
+    if (string.IsNullOrWhiteSpace(redisPassword))
     {
-        builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisCon));
+        throw new InvalidOperationException("REDIS_PASSWORD is missing");
     }
-    catch (Exception ex)
-    {
-        // Log and fail fast — a missing Redis connection should not silently disable caching
-        Console.Error.WriteLine($"[STARTUP] Redis connection failed: {ex.Message}. Check Redis:ConnectionString configuration.");
-        throw;
-    }
+
+    var redisCon = $"localhost:6379,password={redisPassword},abortConnect=false";
+   
+    builder.Services.AddSingleton<IConnectionMultiplexer>(
+
+        ConnectionMultiplexer.Connect(redisCon));
 }
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -122,7 +125,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<RatingMiddleware>();
 app.MapControllers();
-
-await WebApiShop.DataMigration.PasswordHashMigration.RunAsync(app.Services);
-
 app.Run();
